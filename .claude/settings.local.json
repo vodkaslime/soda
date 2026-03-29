@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vite build)",
+      "Bash(npm install -D tailwindcss @tailwindcss/vite)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(cargo check)",
+      "Bash(npm install react-hot-toast)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
