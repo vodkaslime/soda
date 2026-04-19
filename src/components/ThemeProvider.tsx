@@ -24,6 +24,17 @@ function getInitialTheme(): Theme {
   return "light";
 }
 
+function runThemeTransition() {
+  if (typeof document === "undefined") return;
+
+  const root = document.documentElement;
+  root.classList.add("theme-switching");
+
+  window.setTimeout(() => {
+    root.classList.remove("theme-switching");
+  }, 900);
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
@@ -33,7 +44,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [theme]);
 
   function toggleTheme() {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+    const nextTheme = theme === "light" ? "dark" : "light";
+    runThemeTransition();
+    setTheme(nextTheme);
   }
 
   return (

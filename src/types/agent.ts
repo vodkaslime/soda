@@ -3,6 +3,12 @@ export interface AgentConfigFile {
   exists: boolean;
 }
 
+export interface AgentGatewayInfo {
+  base_url: string;
+  default_model: string;
+  api_style: string;
+}
+
 export interface AgentDetailData {
   name: string;
   label: string;
@@ -17,6 +23,7 @@ export interface AgentDetailData {
   skills: string[];
   mcp_servers: string[];
   raw_config: string | null;
+  gateway: AgentGatewayInfo | null;
 }
 
 export interface AgentStatus {

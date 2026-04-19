@@ -1,4 +1,5 @@
 import * as Dialog from "@radix-ui/react-dialog";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   open: boolean;
@@ -15,10 +16,14 @@ export default function ConfirmDialog({
   onOpenChange,
   title,
   description,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  confirmLabel,
+  cancelLabel,
   onConfirm,
 }: Props) {
+  const { t } = useTranslation();
+  const resolvedConfirmLabel = confirmLabel ?? t("common.confirm");
+  const resolvedCancelLabel = cancelLabel ?? t("common.cancel");
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -33,17 +38,17 @@ export default function ConfirmDialog({
           <div className="flex items-center justify-end gap-2">
             <Dialog.Close asChild>
               <button className="px-4 py-2 rounded-lg border border-border bg-surface text-sm text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-all duration-150 cursor-pointer font-medium">
-                {cancelLabel}
+                {resolvedCancelLabel}
               </button>
             </Dialog.Close>
             <button
-              className="px-4 py-2 rounded-lg bg-coral text-white text-sm font-medium cursor-pointer transition-all duration-150 hover:bg-coral/90 hover:shadow-lg hover:shadow-coral/20 active:scale-[0.97]"
+              className="px-4 py-2 rounded-lg bg-coral text-white text-sm font-medium cursor-pointer transition-colors duration-150 hover:bg-coral/90"
               onClick={() => {
                 onConfirm();
                 onOpenChange(false);
               }}
             >
-              {confirmLabel}
+              {resolvedConfirmLabel}
             </button>
           </div>
         </Dialog.Content>

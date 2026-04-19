@@ -2,6 +2,9 @@ pub mod codex;
 pub mod claude;
 pub mod opencode;
 pub mod openclaw;
+pub mod crush;
+pub mod forgecode;
+pub mod gemini;
 
 use crate::{AgentDetail, AgentStatus};
 
@@ -46,6 +49,9 @@ pub fn all_agents() -> Vec<Box<dyn Agent>> {
         Box::new(claude::ClaudeAgent),
         Box::new(opencode::OpenCodeAgent),
         Box::new(openclaw::OpenClawAgent),
+        Box::new(crush::CrushAgent),
+        Box::new(forgecode::ForgeCodeAgent),
+        Box::new(gemini::GeminiAgent),
     ]
 }
 

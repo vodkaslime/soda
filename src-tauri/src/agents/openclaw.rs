@@ -45,6 +45,7 @@ impl Agent for OpenClawAgent {
             skills: Vec::new(),
             mcp_servers: Vec::new(),
             raw_config: None,
+            gateway: None,
         };
 
         let home = dirs::home_dir().unwrap_or_default();
