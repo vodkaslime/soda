@@ -75,6 +75,34 @@ struct SkillEntry {
     folder_path: String,
 }
 
+#[derive(Serialize, Clone)]
+struct TerminalFileTreeEntry {
+    name: String,
+    path: String,
+    is_dir: bool,
+}
+
+#[derive(Serialize, Clone)]
+struct TerminalFilePreview {
+    path: String,
+    content: String,
+    truncated: bool,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct TerminalBoardCard {
+    id: String,
+    title: String,
+    note: String,
+    column: String,
+    #[serde(default)]
+    priority: String,
+    #[serde(default)]
+    color: String,
+    #[serde(default)]
+    tags: Vec<String>,
+}
+
 #[derive(Serialize, Deserialize, Clone, Default)]
 struct SkillKit {
     id: String,
@@ -188,6 +216,8 @@ struct AppConfig {
     agent_skill_kits: HashMap<String, Vec<String>>,
     #[serde(default)]
     gateway: GatewayConfig,
+    #[serde(default)]
+    terminal_board: Vec<TerminalBoardCard>,
 }
 
 #[derive(Serialize)]
@@ -337,6 +367,9 @@ fn get_agent_details(agent_name: String) -> Result<AgentDetail, String> {
 
 #[tauri::command]
 fn scan_agent_skills(agent_name: String) -> Result<Vec<SkillEntry>, String> {
+    // Sync kit-assigned skills before scanning so symlinks are up to date
+    let _ = deploy_skills_for_agent(&agent_name);
+
     let agent = agents::find_agent(&agent_name)
         .ok_or_else(|| format!("Unknown agent: {}", agent_name))?;
     let skills_dir = agent
@@ -576,6 +609,24 @@ fn scan_folder_for_skills(folder_path: &str) -> Vec<SkillEntry> {
 
     let mut skills = Vec::new();
 
+    // Check if the folder itself is a skill (has SKILL.md at root)
+    let root_skill_md = path.join("SKILL.md");
+    if root_skill_md.exists() {
+        if let Ok(content) = fs::read_to_string(&root_skill_md) {
+            if let Some(meta) = parse_skill_md_frontmatter(&content) {
+                skills.push(SkillEntry {
+                    id: path.display().to_string(),
+                    name: meta.name,
+                    description: meta.description,
+                    source_path: path.display().to_string(),
+                    skill_type: "folder".to_string(),
+                    folder_path: folder_path.to_string(),
+                });
+            }
+        }
+    }
+
+    // Also scan subdirectories for skills
     if let Ok(entries) = fs::read_dir(path) {
         for entry in entries.flatten() {
             let entry_path = entry.path();
@@ -701,6 +752,199 @@ fn delete_skill_kit(kit_id: String) -> Result<Vec<SkillKit>, String> {
     Ok(config.skill_kits)
 }
 
+/// Deploy (symlink) all skills from assigned kits into the agent's skills directory.
+/// For folder skills, symlinks directly. For zip skills, extracts to a cache dir first,
+/// then symlinks the extracted folder.
+fn deploy_skills_for_agent(agent_name: &str) -> Result<(), String> {
+    let agent = agents::find_agent(agent_name)
+        .ok_or_else(|| format!("Unknown agent: {}", agent_name))?;
+    let skills_dir = agent.skills_dir()
+        .ok_or_else(|| format!("Agent {} has no skills directory", agent_name))?;
+
+    let config = load_config()?;
+    let assigned_kit_ids = config.agent_skill_kits.get(agent_name).cloned().unwrap_or_default();
+
+    fs::create_dir_all(&skills_dir)
+        .map_err(|e| format!("Failed to create skills directory: {}", e))?;
+
+    // Collect all skill source paths from assigned kits
+    let mut target_skill_ids: Vec<String> = Vec::new();
+    for kit_id in &assigned_kit_ids {
+        if let Some(kit) = config.skill_kits.iter().find(|k| &k.id == kit_id) {
+            target_skill_ids.extend(kit.skill_ids.iter().cloned());
+        }
+    }
+
+    // Skills cache directory for extracted zips
+    let cache_dir = dirs::home_dir()
+        .ok_or_else(|| "Cannot determine home directory".to_string())?
+        .join(".soda")
+        .join("skills-cache");
+    fs::create_dir_all(&cache_dir)
+        .map_err(|e| format!("Failed to create skills cache: {}", e))?;
+
+    // Build a set of all known skill paths (from any kit) for cleanup detection.
+    // For zip skills, also include the expected cache path so cleanup can match symlinks.
+    let all_known_skills: Vec<String> = config.skill_kits.iter()
+        .flat_map(|kit| kit.skill_ids.iter().cloned())
+        .flat_map(|sid| {
+            let source = Path::new(&sid);
+            if source.extension().is_some_and(|e| e == "zip") {
+                let zip_stem = source.file_stem()
+                    .map(|s| s.to_string_lossy().to_string())
+                    .unwrap_or_else(|| slugify(&sid));
+                let cached = cache_dir.join(&zip_stem).display().to_string();
+                vec![sid, cached]
+            } else {
+                vec![sid]
+            }
+        })
+        .collect();
+
+    // Build the same for currently assigned skills
+    let assigned_sources: Vec<String> = target_skill_ids.iter()
+        .flat_map(|sid| {
+            let source = Path::new(sid);
+            if source.extension().is_some_and(|e| e == "zip") {
+                let zip_stem = source.file_stem()
+                    .map(|s| s.to_string_lossy().to_string())
+                    .unwrap_or_else(|| slugify(sid));
+                let cached = cache_dir.join(&zip_stem).display().to_string();
+                vec![sid.clone(), cached]
+            } else {
+                vec![sid.clone()]
+            }
+        })
+        .collect();
+
+    // Remove any existing soda-managed symlinks in the skills dir that are no longer assigned
+    if let Ok(entries) = fs::read_dir(&skills_dir) {
+        for entry in entries.flatten() {
+            let entry_path = entry.path();
+            if entry_path.is_symlink() {
+                if let Ok(target) = std::fs::read_link(&entry_path) {
+                    let target_str = target.display().to_string();
+                    // Check if this symlink still points to an assigned skill
+                    let is_still_assigned = assigned_sources.iter().any(|sid| {
+                        target_str.starts_with(sid) || sid.starts_with(&target_str)
+                    });
+                    if !is_still_assigned {
+                        // Check if it was ever managed by soda
+                        let is_soda_managed = all_known_skills.iter().any(|sid| {
+                            target_str.starts_with(sid) || sid.starts_with(&target_str)
+                        });
+                        if is_soda_managed {
+                            let _ = fs::remove_file(&entry_path);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Create symlinks for all assigned skills
+    for skill_id in &target_skill_ids {
+        let source = Path::new(skill_id);
+        if !source.exists() {
+            continue;
+        }
+
+        // Resolve the actual deployable source path
+        let (deploy_source, link_name) = if source.extension().is_some_and(|e| e == "zip") {
+            // Zip file: extract to cache, symlink the extracted folder
+            let zip_stem = source.file_stem()
+                .map(|s| s.to_string_lossy().to_string())
+                .unwrap_or_else(|| slugify(skill_id));
+            let extracted_dir = cache_dir.join(&zip_stem);
+
+            // Extract if not already cached
+            if !extracted_dir.join("SKILL.md").exists() {
+                let file = fs::File::open(source)
+                    .map_err(|e| format!("Failed to open zip {}: {}", skill_id, e))?;
+                let mut archive = zip::ZipArchive::new(file)
+                    .map_err(|e| format!("Failed to read zip {}: {}", skill_id, e))?;
+
+                // Clean and recreate
+                if extracted_dir.exists() {
+                    let _ = fs::remove_dir_all(&extracted_dir);
+                }
+                fs::create_dir_all(&extracted_dir)
+                    .map_err(|e| format!("Failed to create cache dir: {}", e))?;
+
+                for i in 0..archive.len() {
+                    let mut entry = archive.by_index(i)
+                        .map_err(|e| format!("Failed to read zip entry: {}", e))?;
+                    let entry_name = entry.name().to_string();
+
+                    if entry_name.ends_with('/') || entry_name.starts_with("__MACOSX") {
+                        continue;
+                    }
+
+                    let relative = if let Some(slash) = entry_name.find('/') {
+                        &entry_name[slash + 1..]
+                    } else {
+                        &entry_name
+                    };
+
+                    if relative.is_empty() {
+                        continue;
+                    }
+
+                    let out_path = extracted_dir.join(relative);
+
+                    if entry.is_dir() {
+                        fs::create_dir_all(&out_path)
+                            .map_err(|e| format!("Failed to create directory: {}", e))?;
+                    } else {
+                        if let Some(parent) = out_path.parent() {
+                            fs::create_dir_all(parent)
+                                .map_err(|e| format!("Failed to create parent: {}", e))?;
+                        }
+                        let mut outfile = fs::File::create(&out_path)
+                            .map_err(|e| format!("Failed to create file: {}", e))?;
+                        std::io::copy(&mut entry, &mut outfile)
+                            .map_err(|e| format!("Failed to write file: {}", e))?;
+                    }
+                }
+            }
+
+            (extracted_dir, zip_stem)
+        } else {
+            // Folder skill: symlink directly
+            let name = source.file_name()
+                .map(|n| n.to_string_lossy().to_string())
+                .unwrap_or_else(|| slugify(skill_id));
+            (source.to_path_buf(), name)
+        };
+
+        let link_path = skills_dir.join(&link_name);
+
+        // Remove existing link/file if it exists
+        if link_path.exists() || link_path.is_symlink() {
+            let _ = fs::remove_file(&link_path);
+        }
+
+        // Create symlink to the resolved source
+        #[cfg(unix)]
+        {
+            std::os::unix::fs::symlink(&deploy_source, &link_path)
+                .map_err(|e| format!("Failed to symlink {}: {}", link_name, e))?;
+        }
+        #[cfg(windows)]
+        {
+            if deploy_source.is_dir() {
+                std::os::windows::fs::symlink_dir(&deploy_source, &link_path)
+                    .map_err(|e| format!("Failed to symlink dir {}: {}", link_name, e))?;
+            } else {
+                std::os::windows::fs::symlink_file(&deploy_source, &link_path)
+                    .map_err(|e| format!("Failed to symlink file {}: {}", link_name, e))?;
+            }
+        }
+    }
+
+    Ok(())
+}
+
 #[tauri::command]
 fn get_agent_skill_kits() -> Result<HashMap<String, Vec<String>>, String> {
     Ok(load_config()?.agent_skill_kits)
@@ -709,8 +953,12 @@ fn get_agent_skill_kits() -> Result<HashMap<String, Vec<String>>, String> {
 #[tauri::command]
 fn set_agent_skill_kits(agent_name: String, kit_ids: Vec<String>) -> Result<HashMap<String, Vec<String>>, String> {
     let mut config = load_config()?;
-    config.agent_skill_kits.insert(agent_name, kit_ids);
+    config.agent_skill_kits.insert(agent_name.clone(), kit_ids);
     save_config(&config)?;
+
+    // Deploy skills to agent's skills directory
+    let _ = deploy_skills_for_agent(&agent_name);
+
     Ok(config.agent_skill_kits)
 }
 
@@ -1126,11 +1374,72 @@ fn normalize_terminal_cwd(raw: &str) -> Result<PathBuf, String> {
 }
 
 #[tauri::command]
+fn get_terminal_board() -> Result<Vec<TerminalBoardCard>, String> {
+    Ok(load_config()?.terminal_board)
+}
+
+#[tauri::command]
+fn save_terminal_board(cards: Vec<TerminalBoardCard>) -> Result<Vec<TerminalBoardCard>, String> {
+    let mut config = load_config()?;
+    config.terminal_board = cards;
+    save_config(&config)?;
+    Ok(config.terminal_board)
+}
+
+#[tauri::command]
 fn get_terminal_bootstrap() -> Result<TerminalBootstrap, String> {
     let cwd = std::env::current_dir().map_err(|e| format!("Failed to resolve current directory: {}", e))?;
     Ok(TerminalBootstrap {
         cwd: cwd.display().to_string(),
         shell: detect_default_shell(),
+    })
+}
+
+#[tauri::command]
+fn terminal_list_directory(cwd: String) -> Result<Vec<TerminalFileTreeEntry>, String> {
+    let root = normalize_terminal_cwd(&cwd)?;
+    let entries = fs::read_dir(&root)
+        .map_err(|e| format!("Failed to read directory {}: {}", root.display(), e))?;
+
+    let mut items = Vec::new();
+    for entry in entries.flatten() {
+        let path = entry.path();
+        let name = entry.file_name().to_string_lossy().to_string();
+        let is_dir = path.is_dir();
+        items.push(TerminalFileTreeEntry {
+            name,
+            path: path.display().to_string(),
+            is_dir,
+        });
+    }
+
+    items.sort_by(|a, b| match (a.is_dir, b.is_dir) {
+        (true, false) => std::cmp::Ordering::Less,
+        (false, true) => std::cmp::Ordering::Greater,
+        _ => a.name.to_lowercase().cmp(&b.name.to_lowercase()),
+    });
+
+    Ok(items)
+}
+
+#[tauri::command]
+fn terminal_read_file_preview(path: String) -> Result<TerminalFilePreview, String> {
+    let file_path = PathBuf::from(&path);
+    if !file_path.is_file() {
+        return Err(format!("File not found: {}", file_path.display()));
+    }
+
+    let bytes = fs::read(&file_path)
+        .map_err(|e| format!("Failed to read file {}: {}", file_path.display(), e))?;
+    let max_len = 16 * 1024;
+    let truncated = bytes.len() > max_len;
+    let slice = &bytes[..bytes.len().min(max_len)];
+    let content = String::from_utf8_lossy(slice).to_string();
+
+    Ok(TerminalFilePreview {
+        path: file_path.display().to_string(),
+        content,
+        truncated,
     })
 }
 
@@ -1164,6 +1473,12 @@ fn terminal_create_session(app: AppHandle, req: TerminalSessionRequest) -> Resul
     let mut command = CommandBuilder::new(shell.clone());
     command.cwd(cwd.clone());
     command.env("TERM", "xterm-256color");
+    if shell.contains("bash") {
+        command.env(
+            "PROMPT_COMMAND",
+            r#"printf '\x1f__SODA_CWD__:%s\x1f\n' "$PWD""#,
+        );
+    }
 
     let child = pair
         .slave
@@ -1297,7 +1612,11 @@ pub fn run() {
             delete_provider,
             delete_model,
             set_provider_api_key,
+            get_terminal_board,
+            save_terminal_board,
             get_terminal_bootstrap,
+            terminal_list_directory,
+            terminal_read_file_preview,
             terminal_create_session,
             terminal_write,
             terminal_resize,

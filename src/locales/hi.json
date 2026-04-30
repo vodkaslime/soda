@@ -6,6 +6,7 @@
     "providers": "प्रोवाइडर",
     "gateway": "गेटवे",
     "agents": "एजेंट",
+    "settings": "सेटिंग्स",
     "theme": "थीम",
     "language": "भाषा",
     "switchToDark": "डार्क मोड पर जाएं",
@@ -137,7 +138,13 @@
     "processExited": "[प्रोसेस समाप्त{{suffix}}]",
     "exitCodeSuffix": ": {{code}}",
     "newTab": "नया टर्मिनल",
-    "closeTab": "टर्मिनल बंद करें"
+    "closeTab": "टर्मिनल बंद करें",
+    "welcomeTitle": "Soda में आपका स्वागत है",
+    "welcomeSubtitle": "आपका AI एजेंट वर्कस्पेस तैयार है।",
+    "agentsReady": "उपयोग के लिए तैयार",
+    "agentsAvailable": "इंस्टॉल करने के लिए उपलब्ध",
+    "agents": "एजेंट",
+    "notInstalled": "{{agent}} — इंस्टॉल नहीं है"
   },
   "agentDetail": {
     "openInstallGuide": "इंस्टॉल गाइड खोलें",
@@ -222,5 +229,12 @@
     "availableSkills": "{{count}} उपलब्ध",
     "edit": "संपादित करें",
     "delete": "हटाएं"
+  },
+  "settings": {
+    "title": "सेटिंग्स",
+    "language": "भाषा",
+    "theme": "दिखावट",
+    "lightMode": "लाइट",
+    "darkMode": "डार्क"
   }
 }

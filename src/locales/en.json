@@ -6,6 +6,7 @@
     "providers": "Providers",
     "gateway": "Gateway",
     "agents": "Agents",
+    "settings": "Settings",
     "theme": "Theme",
     "language": "Language",
     "switchToDark": "Switch to dark mode",
@@ -31,7 +32,6 @@
     "all": "All",
     "missing": "Missing",
     "usedBy": "Used by",
-    "cancel": "Cancel",
     "confirm": "Confirm",
     "create": "Create",
     "edit": "Edit",
@@ -96,8 +96,6 @@
     "removedModel": "Model removed",
     "emptyState": "No providers configured yet. Add one to get started.",
     "savedModel": "Saved model {{label}}",
-    "removedProvider": "Provider removed",
-    "removedModel": "Model removed",
     "requiredProviderFields": "Provider label, base URL, and env var are required",
     "requiredModelFields": "Model label, provider, and model name are required",
     "wireApiPlaceholder": "Wire API (responses/chat)",
@@ -137,7 +135,13 @@
     "processExited": "[process exited{{suffix}}]",
     "exitCodeSuffix": ": {{code}}",
     "newTab": "New terminal",
-    "closeTab": "Close tab"
+    "closeTab": "Close tab",
+    "welcomeTitle": "Welcome to Soda",
+    "welcomeSubtitle": "Your AI agent workspace is ready.",
+    "agentsReady": "Ready to use",
+    "agentsAvailable": "Available to install",
+    "agents": "Agents",
+    "notInstalled": "{{agent}} — not installed"
   },
   "agentDetail": {
     "openInstallGuide": "Open install guide",
@@ -222,5 +226,12 @@
     "availableSkills": "{{count}} available",
     "edit": "Edit",
     "delete": "Delete"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Appearance",
+    "lightMode": "Light",
+    "darkMode": "Dark"
   }
 }

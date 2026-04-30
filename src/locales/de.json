@@ -6,6 +6,7 @@
     "providers": "Anbieter",
     "gateway": "Gateway",
     "agents": "Agenten",
+    "settings": "Einstellungen",
     "theme": "Design",
     "language": "Sprache",
     "switchToDark": "Zum dunklen Modus wechseln",
@@ -137,7 +138,13 @@
     "processExited": "[Prozess beendet{{suffix}}]",
     "exitCodeSuffix": ": {{code}}",
     "newTab": "Neues Terminal",
-    "closeTab": "Terminal schliessen"
+    "closeTab": "Terminal schliessen",
+    "welcomeTitle": "Willkommen bei Soda",
+    "welcomeSubtitle": "Dein KI-Agenten-Arbeitsbereich ist bereit.",
+    "agentsReady": "Bereit",
+    "agentsAvailable": "Verfugbar zur Installation",
+    "agents": "Agenten",
+    "notInstalled": "{{agent}} — nicht installiert"
   },
   "agentDetail": {
     "openInstallGuide": "Installationsanleitung offnen",
@@ -222,5 +229,12 @@
     "availableSkills": "{{count}} verfugbar",
     "edit": "Bearbeiten",
     "delete": "Loschen"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache",
+    "theme": "Erscheinungsbild",
+    "lightMode": "Hell",
+    "darkMode": "Dunkel"
   }
 }

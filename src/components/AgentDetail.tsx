@@ -174,6 +174,9 @@ export default function AgentDetail({ agentName, onBack }: Props) {
     setAgentKitIds(nextKitIds);
     try {
       await invoke("set_agent_skill_kits", { agentName, kitIds: nextKitIds });
+      // Re-scan skills after deployment to refresh the UI
+      const skills = await invoke<AgentSkillEntry[]>("scan_agent_skills", { agentName }).catch(() => []);
+      setAgentSkills(skills);
     } catch (err) {
       toast.error(String(err));
     }

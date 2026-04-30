@@ -6,6 +6,7 @@
     "providers": "المزوّدون",
     "gateway": "البوابة",
     "agents": "الوكلاء",
+    "settings": "الإعدادات",
     "theme": "السمة",
     "language": "اللغة",
     "switchToDark": "التبديل إلى الوضع الداكن",
@@ -137,7 +138,13 @@
     "processExited": "[انتهت العملية{{suffix}}]",
     "exitCodeSuffix": ": {{code}}",
     "newTab": "طرفية جديدة",
-    "closeTab": "إغلاق الطرفية"
+    "closeTab": "إغلاق الطرفية",
+    "welcomeTitle": "مرحبًا بك في Soda",
+    "welcomeSubtitle": "مساحة عمل الوكلاء الذكيين جاهزة.",
+    "agentsReady": "جاهز للاستخدام",
+    "agentsAvailable": "متاح للتثبيت",
+    "agents": "الوكلاء",
+    "notInstalled": "{{agent}} — غير مثبّت"
   },
   "agentDetail": {
     "openInstallGuide": "افتح دليل التثبيت",
@@ -222,5 +229,12 @@
     "availableSkills": "{{count}} متاح",
     "edit": "تحرير",
     "delete": "حذف"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "theme": "المظهر",
+    "lightMode": "فاتح",
+    "darkMode": "داكن"
   }
 }

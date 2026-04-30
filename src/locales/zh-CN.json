@@ -6,6 +6,7 @@
     "providers": "提供商",
     "gateway": "网关",
     "agents": "智能体",
+    "settings": "设置",
     "theme": "主题",
     "language": "语言",
     "switchToDark": "切换到深色模式",
@@ -31,7 +32,6 @@
     "all": "全部",
     "missing": "缺失",
     "usedBy": "使用者",
-    "cancel": "取消",
     "confirm": "确认",
     "create": "创建",
     "edit": "编辑",
@@ -96,8 +96,6 @@
     "removedModel": "模型已移除",
     "emptyState": "尚未配置提供商，添加一个以开始使用。",
     "savedModel": "已保存模型 {{label}}",
-    "removedProvider": "提供商已移除",
-    "removedModel": "模型已移除",
     "requiredProviderFields": "提供商标签、基础 URL 和环境变量为必填项",
     "requiredModelFields": "模型标签、提供商和模型名称为必填项",
     "wireApiPlaceholder": "线路 API（responses/chat）",
@@ -137,7 +135,13 @@
     "processExited": "[进程已退出{{suffix}}]",
     "exitCodeSuffix": "：{{code}}",
     "newTab": "新建终端",
-    "closeTab": "关闭终端"
+    "closeTab": "关闭终端",
+    "welcomeTitle": "欢迎使用 Soda",
+    "welcomeSubtitle": "你的 AI 智能体工作区已就绪。",
+    "agentsReady": "已就绪",
+    "agentsAvailable": "可安装",
+    "agents": "智能体",
+    "notInstalled": "{{agent}} — 未安装"
   },
   "agentDetail": {
     "openInstallGuide": "打开安装指南",
@@ -222,5 +226,12 @@
     "availableSkills": "{{count}} 个可用",
     "edit": "编辑",
     "delete": "删除"
+  },
+  "settings": {
+    "title": "设置",
+    "language": "语言",
+    "theme": "外观",
+    "lightMode": "浅色",
+    "darkMode": "深色"
   }
 }

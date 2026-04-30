@@ -6,6 +6,7 @@
     "providers": "Proveedores",
     "gateway": "Gateway",
     "agents": "Agentes",
+    "settings": "Configuración",
     "theme": "Tema",
     "language": "Idioma",
     "switchToDark": "Cambiar al modo oscuro",
@@ -137,7 +138,13 @@
     "processExited": "[proceso finalizado{{suffix}}]",
     "exitCodeSuffix": ": {{code}}",
     "newTab": "Nuevo terminal",
-    "closeTab": "Cerrar terminal"
+    "closeTab": "Cerrar terminal",
+    "welcomeTitle": "Bienvenido a Soda",
+    "welcomeSubtitle": "Tu espacio de trabajo de agentes IA esta listo.",
+    "agentsReady": "Listos para usar",
+    "agentsAvailable": "Disponibles para instalar",
+    "agents": "Agentes",
+    "notInstalled": "{{agent}} — no instalado"
   },
   "agentDetail": {
     "openInstallGuide": "Abrir guia de instalacion",
@@ -222,5 +229,12 @@
     "availableSkills": "{{count}} disponibles",
     "edit": "Editar",
     "delete": "Eliminar"
+  },
+  "settings": {
+    "title": "Configuración",
+    "language": "Idioma",
+    "theme": "Apariencia",
+    "lightMode": "Claro",
+    "darkMode": "Oscuro"
   }
 }

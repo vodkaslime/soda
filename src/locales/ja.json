@@ -6,6 +6,7 @@
     "providers": "プロバイダー",
     "gateway": "ゲートウェイ",
     "agents": "エージェント",
+    "settings": "設定",
     "theme": "テーマ",
     "language": "言語",
     "switchToDark": "ダークモードに切り替え",
@@ -31,7 +32,6 @@
     "all": "すべて",
     "missing": "未検出",
     "usedBy": "使用先",
-    "cancel": "キャンセル",
     "confirm": "確認",
     "create": "作成",
     "edit": "編集",
@@ -96,8 +96,6 @@
     "removedModel": "モデルを削除しました",
     "emptyState": "プロバイダーがまだ設定されていません。追加して始めましょう。",
     "savedModel": "モデル {{label}} を保存しました",
-    "removedProvider": "プロバイダーを削除しました",
-    "removedModel": "モデルを削除しました",
     "requiredProviderFields": "プロバイダーのラベル、ベース URL、環境変数は必須です",
     "requiredModelFields": "モデルのラベル、プロバイダー、モデル名は必須です",
     "wireApiPlaceholder": "Wire API (responses/chat)",
@@ -137,7 +135,13 @@
     "processExited": "[プロセス終了{{suffix}}]",
     "exitCodeSuffix": "：{{code}}",
     "newTab": "新しいターミナル",
-    "closeTab": "ターミナルを閉じる"
+    "closeTab": "ターミナルを閉じる",
+    "welcomeTitle": "Sodaへようこそ",
+    "welcomeSubtitle": "AIエージェントワークスペースの準備ができました。",
+    "agentsReady": "使用可能",
+    "agentsAvailable": "インストール可能",
+    "agents": "エージェント",
+    "notInstalled": "{{agent}} — 未インストール"
   },
   "agentDetail": {
     "openInstallGuide": "インストールガイドを開く",
@@ -222,5 +226,12 @@
     "availableSkills": "{{count}} 件利用可能",
     "edit": "編集",
     "delete": "削除"
+  },
+  "settings": {
+    "title": "設定",
+    "language": "言語",
+    "theme": "外観",
+    "lightMode": "ライト",
+    "darkMode": "ダーク"
   }
 }

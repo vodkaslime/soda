@@ -5,7 +5,8 @@
       "Bash(npm install -D tailwindcss @tailwindcss/vite)",
       "Bash(npx tsc --noEmit)",
       "Bash(cargo check)",
-      "Bash(npm install react-hot-toast)"
+      "Bash(npm install react-hot-toast)",
+      "Read(//home/jiachen/workspace/cdd/skills/complaint-driven-development/**)"
     ],
     "deny": [],
     "ask": []

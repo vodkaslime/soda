@@ -6,6 +6,7 @@
     "providers": "프로바이더",
     "gateway": "게이트웨이",
     "agents": "에이전트",
+    "settings": "설정",
     "theme": "테마",
     "language": "언어",
     "switchToDark": "다크 모드로 전환",
@@ -31,7 +32,6 @@
     "all": "전체",
     "missing": "누락",
     "usedBy": "사용 대상",
-    "cancel": "취소",
     "confirm": "확인",
     "create": "생성",
     "edit": "편집",
@@ -92,12 +92,10 @@
     "savedProvider": "프로바이더 {{label}} 저장됨",
     "addedProvider": "프로바이더가 추가되었습니다",
     "addedModel": "모델이 추가되었습니다",
-    "removedProvider": "프로바이더가 삭제되었습니다",
-    "removedModel": "모델이 삭제되었습니다",
-    "emptyState": "아직 구성된 프로바이더가 없습니다. 추가하여 시작하세요.",
-    "savedModel": "모델 {{label}} 저장됨",
     "removedProvider": "프로바이더가 제거되었습니다",
     "removedModel": "모델이 제거되었습니다",
+    "emptyState": "아직 구성된 프로바이더가 없습니다. 추가하여 시작하세요.",
+    "savedModel": "모델 {{label}} 저장됨",
     "requiredProviderFields": "프로바이더 레이블, 기본 URL, 환경 변수는 필수입니다",
     "requiredModelFields": "모델 레이블, 프로바이더, 모델 이름은 필수입니다",
     "wireApiPlaceholder": "Wire API (responses/chat)",
@@ -137,7 +135,13 @@
     "processExited": "[프로세스 종료{{suffix}}]",
     "exitCodeSuffix": ": {{code}}",
     "newTab": "새 터미널",
-    "closeTab": "터미널 닫기"
+    "closeTab": "터미널 닫기",
+    "welcomeTitle": "Soda에 오신 것을 환영합니다",
+    "welcomeSubtitle": "AI 에이전트 워크스페이스가 준비되었습니다.",
+    "agentsReady": "사용 가능",
+    "agentsAvailable": "설치 가능",
+    "agents": "에이전트",
+    "notInstalled": "{{agent}} — 미설치"
   },
   "agentDetail": {
     "openInstallGuide": "설치 가이드 열기",
@@ -222,5 +226,12 @@
     "availableSkills": "{{count}}개 사용 가능",
     "edit": "편집",
     "delete": "삭제"
+  },
+  "settings": {
+    "title": "설정",
+    "language": "언어",
+    "theme": "테마",
+    "lightMode": "라이트",
+    "darkMode": "다크"
   }
 }
